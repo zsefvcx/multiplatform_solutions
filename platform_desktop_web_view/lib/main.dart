@@ -88,6 +88,9 @@ class NewWidget extends StatefulWidget {
 class _NewWidgetState extends State<NewWidget> {
   final TextEditingController _editController = TextEditingController();
 
+  late final WebViewController controller;
+
+
   Future<(String, String, String)> _loadHtmlPage() async {
     String? elem;
     String? body;
@@ -118,8 +121,11 @@ class _NewWidgetState extends State<NewWidget> {
   @override
   void initState() {
     print('initState');
-    super.initState();
     _editController.text = 'https://flutter.dev';
+    controller = WebViewController()
+      ..loadRequest(
+        Uri.parse(_editController.text));
+    super.initState();
   }
 
   @override
@@ -154,13 +160,11 @@ class _NewWidgetState extends State<NewWidget> {
                     children: [
                       Text(cors, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.redAccent),),
                       const Divider(),
-                      Expanded(child: Center(child: WebViewWidget(
-                        controller: WebViewController()
-                          ..loadRequest(
-                            Uri.parse(_editController.text),
+                        Expanded(child: Center(child: WebViewWidget(
+                              controller: controller,
+                            ),
                           ),
                       ),
-                      )),
                       const Divider(),
                       Row(
                         children: [
