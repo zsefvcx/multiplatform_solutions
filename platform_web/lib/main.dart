@@ -10,10 +10,6 @@ import 'package:http/http.dart' as http;
 ///4- Run 'flutter clean' (no 100% sur its needed)
 ///
 
-
-
-
-
 void main() {
   runApp(const MyApp());
 }
@@ -46,100 +42,148 @@ class NewWidget extends StatefulWidget {
 
 class _NewWidgetState extends State<NewWidget> {
   final TextEditingController _editController = TextEditingController();
-  String _htmlText = '';
-  String _cors = 'CORS';
-  String _htmlTitle = '';
-  Future<void> loadHtmlPage() async {
+
+  Future<(String, String, String)> _loadHtmlPage() async {
     String? elem;
     String? body;
+    String? cors;
     try {
-      final result = await http.get(Uri.parse(_editController.text),
-      // headers: {
-      //   'Content-Type': 'application/x-www-form-urlencoded',
-      //   'Origin':_editController.text,
-      //   'Access-Control-Allow-Origin': _editController.text
-      // }
-      );
+      final result = await http.get(Uri.parse(_editController.text));
       if (result.statusCode != 200) {
         throw('Error request! statusCode:${result
           .statusCode}');
       }
-      body = result.body;
+      await Future.delayed(const Duration(seconds: 1));
+      cors = 'CORS Header: ${result.headers['access-control-allow-origin']??'None'}';//?????????? то что не респонзится того и нет
+      body = result.body.substring(0, 4000);//обрежем для скорости
       var doc = parse(result.body);
       elem = doc.querySelectorAll("head > title:")[0].innerHtml;
-      //var elem2 = doc.querySelectorAll("head > title:")[0];
       print(result.headers);
     } catch (e){
       print(e);
     }
-    final title = elem??'no title';
-    setState(() {
-      _htmlTitle= title.replaceAll('\n', '').replaceAll('  ', '');
-      _cors = 'CORS';
-      _htmlText = body??'no body';
-    });
-
-
+    String title = elem??'no title';
+    return (
+      cors??'-',
+      title.replaceAll('\n', '').replaceAll('  ', ''),
+      body??'no body',
+    );
   }
 
   @override
   void initState() {
+    print('initState');
     super.initState();
     _editController.text = 'https://flutter.dev';
   }
 
   @override
   void dispose() {
+    print('dispose');
     _editController.dispose();
     super.dispose();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-          appBar: AppBar(title: Text(_htmlTitle, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w600)), centerTitle: false),
-          body: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(_cors, style: const TextStyle(fontSize: 16, color: Colors.redAccent),),
-              const Divider(),
-              Expanded(child: Center(child: Text(_htmlText))),
-              const Divider(),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        //labelText: 'URl address',
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(width: 2),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(width: 2),
-                        ),
+    print('bild');
+    return FutureBuilder<(String, String, String)>(
+      future:  _loadHtmlPage(),
+      builder: (_, snap) {
+        print('FutureBuilder');
+        if(snap.connectionState == ConnectionState.waiting){
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (snap.connectionState == ConnectionState.done) {
+          if(snap.hasData){
+           var (cors, htmlTitle, htmlText) = snap.data??('-','no title','no body');
+            return SafeArea(
+              child: Scaffold(
+                  appBar: AppBar(title: Text(htmlTitle, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w600)), centerTitle: false),
+                  body: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(cors, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.redAccent),),
+                      const Divider(),
+                      Expanded(child: Center(child: Text(htmlText))),
+                      const Divider(),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              decoration: const InputDecoration(
+                                //labelText: 'URl address',
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(width: 2),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(width: 2),
+                                ),
+                              ),
+                              minLines: 1,
+                              autofocus: true,
+                              controller: _editController,
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => setState(() {
+                              cors = '-';
+                              htmlTitle = 'no title';
+                              htmlText = 'no body';
+                            }),
+                            style: ButtonStyle(
+                              minimumSize: const MaterialStatePropertyAll(Size(100,60)),
+                              backgroundColor:
+                              MaterialStatePropertyAll(Colors.grey.shade200),
+                              shape: MaterialStatePropertyAll(RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(2))),
+                            ),
+                            child: const Text('Load'),
+                          ),
+                        ],
                       ),
-                      minLines: 1,
-                      autofocus: true,
-                      controller: _editController,
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => loadHtmlPage(),
-                    style: ButtonStyle(
-                      minimumSize: const MaterialStatePropertyAll(Size(100,60)),
-                      backgroundColor:
-                          MaterialStatePropertyAll(Colors.grey.shade200),
-                      shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2))),
-                    ),
-                    child: const Text('Load'),
-                  ),
+                    ],
+                  )),
+            );
+          } else if(snap.hasError) {
+            return Center(
+              child: Column(
+                children: [
+                  const Text('hasError'),
+                  ElevatedButton(onPressed: ()=> setState(() {
+
+                  }), child: const Text('Refresh'))
                 ],
               ),
-            ],
-          )),
-    );
+            );
+          } else {
+            return Center(
+              child: Column(
+                children: [
+                  const Text('no data'),
+                  ElevatedButton(onPressed: ()=> setState(() {
+
+                  }), child: const Text('Refresh'))
+                ],
+              ),
+            );
+          }
+        } else {
+          return Center(
+            child: Column(
+              children: [
+                const Text('no data'),
+                ElevatedButton(onPressed: ()=> setState(() {
+
+                }), child: const Text('Refresh'))
+              ],
+            ),
+          );
+        }
+      });
   }
 }
