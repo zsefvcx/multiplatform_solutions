@@ -160,10 +160,11 @@ class _NewWidgetState extends State<NewWidget> {
                     children: [
                       Text(cors, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.redAccent),),
                       const Divider(),
-                        Expanded(child: Center(child: WebViewWidget(
-                              controller: controller,
-                            ),
-                          ),
+                        Expanded(child: SafeArea(
+                          child: WebViewWidget(
+                                controller: controller,
+                              ),
+                        ),
                       ),
                       const Divider(),
                       Row(
