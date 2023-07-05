@@ -4,7 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
+
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_web/webview_flutter_web.dart';
+
 
 ///
 ///How chrome extensions be enabled when flutter web debugging?
@@ -45,12 +48,14 @@ enum CustomPlatform{
 
 }
 
-CustomPlatform _checkPlatform(){
+CustomPlatform checkPlatform(){
   if(kIsWeb){
     return CustomPlatform.web;
   } else if(Platform.isWindows){
     return CustomPlatform.windows;
-  } else {
+  } else if(Platform.isAndroid){
+    return CustomPlatform.android;
+  }else {
     return CustomPlatform.another;
   }
 }
@@ -82,13 +87,18 @@ class NewWidget extends StatefulWidget {
   });
 
   @override
-  State<NewWidget> createState() => _NewWidgetState();
+  State<NewWidget> createState() {
+    if (checkPlatform() == CustomPlatform.android) {
+      return _NewWidgetState<WebViewController>();
+    }
+    return _NewWidgetState<PlatformWebViewController>();
+  }
 }
 
-class _NewWidgetState extends State<NewWidget> {
+class _NewWidgetState<T> extends State<NewWidget> {
   final TextEditingController _editController = TextEditingController();
 
-  late final WebViewController controller;
+  late final T controller;
 
 
   Future<(String, String, String)> _loadHtmlPage() async {
@@ -96,6 +106,9 @@ class _NewWidgetState extends State<NewWidget> {
     String? body;
     String? cors;
     try {
+      controller.loadRequest(
+        Uri.parse(_editController.text),
+      );
       final result = await http.get(Uri.parse(_editController.text));
       if (result.statusCode != 200) {
         throw('Error request! statusCode:${result
@@ -122,9 +135,7 @@ class _NewWidgetState extends State<NewWidget> {
   void initState() {
     print('initState');
     _editController.text = 'https://flutter.dev';
-    controller = WebViewController()
-      ..loadRequest(
-        Uri.parse(_editController.text));
+    controller = WebViewController();
     super.initState();
   }
 
@@ -204,7 +215,7 @@ class _NewWidgetState extends State<NewWidget> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(15.0),
-                        child: Center(child: Text('APPLICATION RUNNING ON ${_checkPlatform().toString().toUpperCase()}')),
+                        child: Center(child: Text('APPLICATION RUNNING ON ${checkPlatform().toString().toUpperCase()}')),
                       )
                     ],
                   ),
