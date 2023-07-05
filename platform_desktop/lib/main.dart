@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
@@ -8,7 +11,48 @@ import 'package:http/http.dart' as http;
 ///2- Go to flutter\packages\flutter_tools\lib\src\web and open the file chrome.dart.
 ///3- Find '--disable-extensions' and comment the line
 ///4- Run 'flutter clean' (no 100% sur its needed)
-///
+///5- Add in Chrome https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf/related?hl=ru
+
+enum CustomPlatform{
+  windows,
+  linux,
+  macos,
+  ios,
+  android,
+  web,
+  another;
+
+  @override
+  String toString(){
+    switch (index){
+      case 0:
+        return 'windows';
+      case 1:
+        return 'linux';
+      case 2:
+        return 'macos';
+      case 3:
+        return 'ios';
+      case 4:
+        return 'android';
+      case 5:
+        return 'web';
+      default:
+        return name;
+    }
+  }
+
+}
+
+CustomPlatform _checkPlatform(){
+  if(kIsWeb){
+    return CustomPlatform.web;
+  } else if(Platform.isWindows){
+    return CustomPlatform.windows;
+  } else {
+    return CustomPlatform.another;
+  }
+}
 
 void main() {
   runApp(const MyApp());
@@ -102,8 +146,8 @@ class _NewWidgetState extends State<NewWidget> {
            var (cors, htmlTitle, htmlText) = snap.data??('-','no title','no body');
             return SafeArea(
               child: Scaffold(
-                  appBar: AppBar(title: Text(htmlTitle, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w600)), centerTitle: false),
-                  body: Column(
+                appBar: AppBar(title: Text(htmlTitle, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w600)), centerTitle: false),
+                body: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -146,8 +190,13 @@ class _NewWidgetState extends State<NewWidget> {
                           ),
                         ],
                       ),
+                      Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Center(child: Text('APPLICATION RUNNING ON ${_checkPlatform().toString().toUpperCase()}')),
+                      )
                     ],
-                  )),
+                  ),
+              ),
             );
           } else if(snap.hasError) {
             return Center(
