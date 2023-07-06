@@ -4,13 +4,24 @@ import 'package:platform_desktop_web_view/webview/another.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class AppWebView extends BaseAppWebView {
   late final WebViewController controller;
 
   AppWebView() {
-    if(AppPlatform.platform == CustomPlatform.android) {
-      controller = WebViewController();
+    if(AppPlatform.platform == CustomPlatform.android ||
+       AppPlatform.platform == CustomPlatform.ios
+    ) {
+      late final PlatformWebViewControllerCreationParams params;
+      if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+        params = WebKitWebViewControllerCreationParams();
+      } else {
+        params = const PlatformWebViewControllerCreationParams();
+      }
+
+      controller =
+      WebViewController.fromPlatformCreationParams(params);
     }
   }
 
@@ -19,6 +30,13 @@ class AppWebView extends BaseAppWebView {
   @override
   Widget webView(String link) {
     if(AppPlatform.platform == CustomPlatform.android) {
+      controller.loadRequest(
+        Uri.parse(link),
+      );
+      return WebViewWidget(
+        controller: controller,
+      );
+    } else if(AppPlatform.platform == CustomPlatform.ios) {
       controller.loadRequest(
         Uri.parse(link),
       );
