@@ -1,13 +1,12 @@
-import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
+import 'package:platform_desktop_web_view/custom_platform.dart';
 
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_web/webview_flutter_web.dart';
-
+import 'package:platform_desktop_web_view/webview/another.dart'
+        if(dart.library.io)'package:platform_desktop_web_view/webview/non_web_platform.dart'
+        if(dart.library.html)'package:platform_desktop_web_view/webview/web_platform.dart';
 
 ///
 ///How chrome extensions be enabled when flutter web debugging?
@@ -17,48 +16,7 @@ import 'package:webview_flutter_web/webview_flutter_web.dart';
 ///4- Run 'flutter clean' (no 100% sur its needed)
 ///5- Add in Chrome https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf/related?hl=ru
 
-enum CustomPlatform{
-  windows,
-  linux,
-  macos,
-  ios,
-  android,
-  web,
-  another;
 
-  @override
-  String toString(){
-    switch (index){
-      case 0:
-        return 'windows';
-      case 1:
-        return 'linux';
-      case 2:
-        return 'macos';
-      case 3:
-        return 'ios';
-      case 4:
-        return 'android';
-      case 5:
-        return 'web';
-      default:
-        return name;
-    }
-  }
-
-}
-
-CustomPlatform checkPlatform(){
-  if(kIsWeb){
-    return CustomPlatform.web;
-  } else if(Platform.isWindows){
-    return CustomPlatform.windows;
-  } else if(Platform.isAndroid){
-    return CustomPlatform.android;
-  }else {
-    return CustomPlatform.another;
-  }
-}
 
 void main() {
   runApp(const MyApp());
@@ -87,32 +45,22 @@ class NewWidget extends StatefulWidget {
   });
 
   @override
-  State<NewWidget> createState() {
-    if (checkPlatform() == CustomPlatform.android) {
-      return _NewWidgetState<WebViewController>();
-    }
-    return _NewWidgetState<PlatformWebViewController>();
-  }
+  State<NewWidget> createState() => _NewWidgetState();
+
 }
 
-class _NewWidgetState<T> extends State<NewWidget> {
+class _NewWidgetState extends State<NewWidget> {
   final TextEditingController _editController = TextEditingController();
-
-  late final T controller;
-
 
   Future<(String, String, String)> _loadHtmlPage() async {
     String? elem;
     String? body;
     String? cors;
     try {
-      controller.loadRequest(
-        Uri.parse(_editController.text),
-      );
       final result = await http.get(Uri.parse(_editController.text));
       if (result.statusCode != 200) {
         throw('Error request! statusCode:${result
-          .statusCode}');
+            .statusCode}');
       }
       await Future.delayed(const Duration(seconds: 1));
       cors = 'CORS Header: ${result.headers['access-control-allow-origin']??'None'}';//?????????? то что не респонзится того и нет
@@ -125,9 +73,9 @@ class _NewWidgetState<T> extends State<NewWidget> {
     }
     String title = elem??'no title';
     return (
-      cors??'-',
-      title.replaceAll('\n', '').replaceAll('  ', ''),
-      body??'no body',
+    cors??'-',
+    title.replaceAll('\n', '').replaceAll('  ', ''),
+    body??'no body',
     );
   }
 
@@ -135,7 +83,6 @@ class _NewWidgetState<T> extends State<NewWidget> {
   void initState() {
     print('initState');
     _editController.text = 'https://flutter.dev';
-    controller = WebViewController();
     super.initState();
   }
 
@@ -145,8 +92,6 @@ class _NewWidgetState<T> extends State<NewWidget> {
     _editController.dispose();
     super.dispose();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -172,9 +117,7 @@ class _NewWidgetState<T> extends State<NewWidget> {
                       Text(cors, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.redAccent),),
                       const Divider(),
                         Expanded(child: SafeArea(
-                          child: WebViewWidget(
-                                controller: controller,
-                              ),
+                          child: AppWebView.initial.webView(_editController.text)
                         ),
                       ),
                       const Divider(),
@@ -192,7 +135,6 @@ class _NewWidgetState<T> extends State<NewWidget> {
                                 ),
                               ),
                               minLines: 1,
-                              autofocus: true,
                               controller: _editController,
                             ),
                           ),
@@ -202,6 +144,7 @@ class _NewWidgetState<T> extends State<NewWidget> {
                               htmlTitle = 'no title';
                               htmlText = 'no body';
                             }),
+                            autofocus: true,
                             style: ButtonStyle(
                               minimumSize: const MaterialStatePropertyAll(Size(100,60)),
                               backgroundColor:
@@ -215,7 +158,7 @@ class _NewWidgetState<T> extends State<NewWidget> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(15.0),
-                        child: Center(child: Text('APPLICATION RUNNING ON ${checkPlatform().toString().toUpperCase()}')),
+                        child: Center(child: Text('APPLICATION RUNNING ON ${AppPlatform.platform}')),
                       )
                     ],
                   ),
