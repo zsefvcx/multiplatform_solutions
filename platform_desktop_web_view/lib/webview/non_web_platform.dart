@@ -23,9 +23,6 @@ class AppWebView extends BaseAppWebView {
 
       controller =
       WebViewController.fromPlatformCreationParams(params);
-    } else if(AppPlatform.platform == CustomPlatform.windows) {
-      controller = WebviewController();
-
     }
   }
 
@@ -42,14 +39,7 @@ class AppWebView extends BaseAppWebView {
         controller: controller,
       );
     } else if(AppPlatform.platform == CustomPlatform.windows) {
-      var f = () async {
-        await controller.dispose();
-        await controller.initialize();
-        await controller.loadUrl(link);
-      };
-      return Webview(
-        controller,
-      );
+      return WebViewWindows(link: link);
     }
 
     return MouseRegion(
@@ -58,6 +48,48 @@ class AppWebView extends BaseAppWebView {
         child: Center(child: Text(link)),
         onTap: () async => await launchUrl(Uri.parse(link),),
       ),
+    );
+  }
+}
+
+class WebViewWindows extends StatefulWidget {
+  const WebViewWindows({super.key, required String link}): _link = link;
+  final String _link;
+  @override
+  State<WebViewWindows> createState() => _WebViewWindowsState();
+}
+
+class _WebViewWindowsState extends State<WebViewWindows> {
+  final _controller = WebviewController();
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  void _init() async {
+    await _controller.initialize();
+    await _controller.setBackgroundColor(Colors.transparent);
+    await _controller.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
+    await _controller.loadUrl(widget._link);
+
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _controller.value.isInitialized
+          ? Webview(_controller)
+          : const Text('Not Initialized'),
     );
   }
 }
