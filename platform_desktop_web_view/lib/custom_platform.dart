@@ -47,7 +47,9 @@ class AppPlatform {
       return CustomPlatform.android;
     } else if (Platform.isIOS) {
       return CustomPlatform.ios;
-    } else if (Platform.isFuchsia) {
+    } else if (Platform.isMacOS) {
+      return CustomPlatform.macos;
+    }else if (Platform.isFuchsia) {
       return CustomPlatform.fuchsia;
     } else {
       return CustomPlatform.another;
