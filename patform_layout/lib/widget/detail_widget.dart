@@ -7,7 +7,7 @@ class DetailWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return const SizedBox(
       height: 250,
       width: 300,
       child: Column(
@@ -15,40 +15,22 @@ class DetailWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(10,0,10,0),
-            child: ListTile(
-              leading: Icon(Icons.person),
-              title: Center(child: Text('VIEW PROFILE', style: TextStyle(fontWeight: FontWeight.bold),)),
-              trailing: Icon(Icons.navigate_next),
-            ),
+          ListTile(
+            leading: Icon(Icons.person),
+            title: Center(child: Text('VIEW PROFILE', style: TextStyle(fontWeight: FontWeight.bold),)),
+            trailing: Icon(Icons.navigate_next),
           ),
-          const Divider(color: Colors.black),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(10,0,10,0),
-            child: ListTile(
-              leading: Icon(Icons.people_alt),
-              title: Center(child: Text('FRIENDS', style: TextStyle(fontWeight: FontWeight.bold),)),
-              trailing: Icon(Icons.navigate_next),
-            ),
+          Divider(color: Colors.black),
+          ListTile(
+            leading: Icon(Icons.people_alt),
+            title: Center(child: Text('FRIENDS', style: TextStyle(fontWeight: FontWeight.bold),)),
+            trailing: Icon(Icons.navigate_next),
           ),
-          const Divider(color: Colors.black),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(10,0,10,0),
-            child: ListTile(
-              leading: Icon(Icons.list_alt),
-              title: Center(child: Text('REPORT', style: TextStyle(fontWeight: FontWeight.bold),)),
-              trailing: Icon(Icons.navigate_next),
-            ),
-          ),
-          const Divider(color: Colors.black),
-          ElevatedButton(
-            style: ButtonStyle(
-                minimumSize: const MaterialStatePropertyAll(Size(200,40)),
-                backgroundColor: MaterialStatePropertyAll(Colors.grey.withOpacity(0.2))
-            ),
-            child: const Text('Close'),
-            onPressed: () => Navigator.pop(context),
+          Divider(color: Colors.black),
+          ListTile(
+            leading: Icon(Icons.list_alt),
+            title: Center(child: Text('REPORT', style: TextStyle(fontWeight: FontWeight.bold),)),
+            trailing: Icon(Icons.navigate_next),
           ),
         ],
       ),
