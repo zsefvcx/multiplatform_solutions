@@ -2,26 +2,31 @@
 class PeopleData{
   final int id;
   final String name;
-  final String homeWorld;
+  final String status;
+  final String image;
+  final String gender;
 
   static List<PeopleData> peopleData = [];
 
-  PeopleData(this.id, this.name, this.homeWorld);
+  PeopleData(this.id, this.name, this.status, this.image, this.gender);
 
   static void fromJson(dynamic data){
-    int id = 0;
     if (data is List<dynamic>){
       for (var element in data) {
         if (element is Map<String, dynamic>){
-          if( element['name'       ]!=null && element['name'       ] is String
-              && element['homeworld'  ]!=null && element['homeworld'  ] is String
+          if(    element['id'         ]!=null && element['id'         ] is int
+              && element['name'       ]!=null && element['name'       ] is String
+              && element['status']!=null && element['status'] is String
+              && element['image'  ]!=null && element['image'] is String
+              && element['gender'  ]!=null && element['gender'] is String
           ){
-            id++;
             peopleData.add(
               PeopleData(
-                id,
+                element['id'] as int,
                 element['name'] as String,
-                element['homeworld'] as String
+                element['status'] as String,
+                element['image'] as String,
+                element['gender'] as String
               )
             );
           }

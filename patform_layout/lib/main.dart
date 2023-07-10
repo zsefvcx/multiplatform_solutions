@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:patform_layout/people.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
+import 'widget/widget.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,8 +39,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   Future<bool> readJson() async {
     try {
+      if (PeopleData.peopleData.isNotEmpty) return true;
       await Future.delayed(const Duration(seconds: 2));
-      if (PeopleData.peopleData.isNotEmpty) PeopleData.peopleData.clear();
       final String response = await rootBundle.loadString('assets/index.json');
       final data = await json.decode(response)['results'];
       if (data != null) {
@@ -54,12 +55,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
 
+    const double sizeCard = 720;
 
     return Scaffold(
       appBar: AppBar(
-
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
@@ -70,7 +70,8 @@ class _MyHomePageState extends State<MyHomePage> {
             child: FutureBuilder<bool>(
                 future: readJson(),
                 builder: (_, snap) {
-                  print('FutureBuilder');
+                  //final width = MediaQuery.of(context).size.width;
+                  //print('FutureBuilder');
                   if (snap.connectionState == ConnectionState.waiting) {
                     return const Center(
                       child: CircularProgressIndicator(),
@@ -84,44 +85,14 @@ class _MyHomePageState extends State<MyHomePage> {
                         return GridView.builder(
                             gridDelegate:
                                 const SliverGridDelegateWithMaxCrossAxisExtent(
-                                    maxCrossAxisExtent: 360,
+                                    maxCrossAxisExtent: sizeCard/2,
                                     childAspectRatio: 3 / 2,
                                     crossAxisSpacing: 20,
                                     mainAxisSpacing: 20),
                             itemCount: length,
-                            itemBuilder: (BuildContext ctx, index) {
-                              return const Card(
-                                child: SizedBox(
-                                  height: 360,
-                                  child: Column(
-                                    children: [
-                                      Expanded(
-                                        flex: 3,
-                                        child: SizedBox(
-                                          height: 220,
-                                          width: 220,
-                                          child: CircleAvatar(
-                                            minRadius: 220,
-                                            maxRadius: 220,
-                                            backgroundImage:
-                                                CachedNetworkImageProvider(
-                                              'https://rickandmortyapi.com/api/character/avatar/183.jpeg',
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child:
-                                              Text('Краткое описание карточки'),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
+                            itemBuilder: (_, index) {
+
+                              return CardWidget(sizeCard: sizeCard, peopleData: PeopleData.peopleData[index],);
                             });
                       }
                     }
