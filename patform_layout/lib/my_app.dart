@@ -35,7 +35,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   Future<bool> readJson() async {
     try {
-      if (PeopleData.peopleData.isNotEmpty) return true;
+      if (PeopleData.peopleData.isNotEmpty) PeopleData.peopleData.clear();
       await Future.delayed(const Duration(seconds: 2));
       final String response = await rootBundle.loadString('assets/index.json');
       final data = await json.decode(response)['results'];
@@ -125,7 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Column(children: [
                       const Text('hasError'),
                       ElevatedButton(
-                          onPressed: () => setState(() {}),
+                          onPressed: () => setState(() {readJsonData = readJson();}),
                           child: const Text('Refresh'))
                     ]),
                   );
@@ -134,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Column(children: [
                       const Text('hasError'),
                       ElevatedButton(
-                          onPressed: () => setState(() {}),
+                          onPressed: () => setState(() {readJsonData = readJson();}),
                           child: const Text('Refresh'))
                     ]),
                   );
@@ -143,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Column(children: [
                       const Text('no data'),
                       ElevatedButton(
-                          onPressed: () => setState(() {}),
+                          onPressed: () => setState(() {readJsonData = readJson();}),
                           child: const Text('Refresh'))
                     ]),
                   );
