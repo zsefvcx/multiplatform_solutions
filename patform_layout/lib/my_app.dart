@@ -49,6 +49,15 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  late Future<bool> readJsonData;
+
+
+  @override
+  void initState() {
+    super.initState();
+    readJsonData = readJson();
+  }
+
   @override
   Widget build(BuildContext context) {
     double x2 = MediaQuery.of(context).size.width;
@@ -62,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SafeArea(
         child: Center(
           child: FutureBuilder<bool>(
-              future: readJson(),
+              future: readJsonData,
               builder: (_, snap) {
                 //final width = MediaQuery.of(context).size.width;
                 //print('FutureBuilder');
