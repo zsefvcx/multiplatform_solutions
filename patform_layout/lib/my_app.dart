@@ -51,7 +51,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   late Future<bool> readJsonData;
 
-
   @override
   void initState() {
     super.initState();
